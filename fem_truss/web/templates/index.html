@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>平面桁架有限元分析平台</title>
+    <style>
+        :root {
+            --primary: #1a365d;
+            --primary-light: #3182ce;
+            --success: #38a169;
+            --warning: #dd6b20;
+            --danger: #e53e3e;
+            --bg: #f7fafc;
+            --card-bg: #ffffff;
+            --text: #2d3748;
+            --text-light: #718096;
+            --border: #e2e8f0;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --radius: 8px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 24px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+        }
+        
+        .form-group textarea {
+            min-height: 200px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85rem;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-light);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .example-btns {
+            margin-bottom: 16px;
+        }
+        
+        .example-btns .btn {
+            font-size: 0.85rem;
+            padding: 8px 16px;
+        }
+        
+        .results-section {
+            margin-top: 24px;
+        }
+        
+        .result-item {
+            background: var(--bg);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .result-item h4 {
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        
+        .result-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--success);
+        }
+        
+        .result-unit {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+        
+        .image-container {
+            margin-top: 16px;
+            text-align: center;
+        }
+        
+        .image-container img {
+            max-width: 100%;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .download-links {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+        
+        .download-links a {
+            color: var(--primary-light);
+            text-decoration: none;
+            padding: 8px 16px;
+            background: var(--bg);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+        
+        .download-links a:hover {
+            background: var(--border);
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 16px 24px;
+            border-radius: var(--radius);
+            color: white;
+            font-weight: 500;
+            box-shadow: var(--shadow);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .toast.success {
+            background: var(--success);
+        }
+        
+        .toast.error {
+            background: var(--danger);
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 16px;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+            color: var(--text-light);
+        }
+        
+        .tab:hover {
+            color: var(--primary);
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            font-weight: 500;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .info-box {
+            background: #ebf8ff;
+            border-left: 4px solid var(--primary-light);
+            padding: 12px 16px;
+            border-radius: 0 var(--radius) var(--radius) 0;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>🏗️ 平面桁架有限元分析平台</h1>
+        <p>Plane Truss Finite Element Analysis Platform</p>
+    </header>
+    
+    <div class="container">
+        <div class="grid">
+            <!-- 左侧：输入区域 -->
+            <div class="card">
+                <h2 class="card-title">📝 结构定义</h2>
+                
+                <div class="example-btns">
+                    <span style="color: var(--text-light); margin-right: 8px;">加载示例:</span>
+                    <button class="btn btn-primary" onclick="loadExample('simple_truss')">简支桁架</button>
+                    <button class="btn btn-primary" onclick="loadExample('frame_truss')">刚架结构</button>
+                </div>
+                
+                <div class="info-box">
+                    💡 在下方输入 JSON 格式的结构数据，或点击上方按钮加载示例。
+                </div>
+                
+                <div class="form-group">
+                    <label for="structureData">结构数据 (JSON)</label>
+                    <textarea id="structureData" placeholder='{
+  "materials": [{"id": 1, "name": "Steel", "E": 2.06e11}],
+  "nodes": [{"id": 1, "x": 0, "y": 0}, ...],
+  "elements": [{"id": 1, "node_i": 1, "node_j": 2, "material_id": 1, "area": 0.001}, ...],
+  "loads": [{"node_id": 3, "fx": 0, "fy": -10000}],
+  "boundaries": [{"node_id": 1, "fix_x": true, "fix_y": true}, ...]
+}'></textarea>
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="createStructure()" id="btnCreate">
+                        创建结构
+                    </button>
+                </div>
+                
+                <div class="tabs" style="margin-top: 24px;">
+                    <div class="tab active" onclick="switchTab('static')">静力分析</div>
+                    <div class="tab" onclick="switchTab('dynamic')">动力分析</div>
+                    <div class="tab" onclick="switchTab('modal')">模态分析</div>
+                </div>
+                
+                <div id="tab-static" class="tab-content active">
+                    <button class="btn btn-success" onclick="analyzeStatic()" id="btnStatic">
+                        执行静力分析
+                    </button>
+                </div>
+                
+                <div id="tab-dynamic" class="tab-content">
+                    <div class="form-group">
+                        <label>分析时长 (s)</label>
+                        <input type="number" id="duration" value="2.0" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>时间步长 (s)</label>
+                        <input type="number" id="dt" value="0.01" step="0.001">
+                    </div>
+                    <div class="form-group">
+                        <label>阻尼比</label>
+                        <input type="number" id="damping" value="0.05" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>地震加速度幅值 (g)</label>
+                        <input type="number" id="amplitude" value="0.1" step="0.01">
+                    </div>
+                    <button class="btn btn-warning" onclick="analyzeDynamic()" id="btnDynamic">
+                        执行动力分析
+                    </button>
+                </div>
+                
+                <div id="tab-modal" class="tab-content">
+                    <div class="form-group">
+                        <label>模态数</label>
+                        <input type="number" id="numModes" value="6" min="1" max="20">
+                    </div>
+                    <button class="btn btn-primary" onclick="analyzeModal()" id="btnModal">
+                        执行模态分析
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 右侧：结果区域 -->
+            <div class="card">
+                <h2 class="card-title">📊 分析结果</h2>
+                
+                <div id="results">
+                    <p style="color: var(--text-light); text-align: center; padding: 40px;">
+                        请先创建结构并执行分析
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="toast" class="toast"></div>
+    
+    <script>
+        // Toast 提示
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // 切换标签页
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+        
+        // 加载示例
+        async function loadExample(name) {
+            try {
+                const response = await fetch(`/api/examples/${name}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('structureData').value = 
+                        JSON.stringify(data.data, null, 2);
+                    showToast('示例加载成功');
+                } else {
+                    showToast(data.error, 'error');
+                }
+            } catch (e) {
+                showToast('加载失败: ' + e.message, 'error');
+            }
+        }
+        
+        // 创建结构
+        async function createStructure() {
+            const btn = document.getElementById('btnCreate');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> 创建中...';
+            
+            try {
+                const dataStr = document.getElementById('structureData').value;
+                const data = JSON.parse(dataStr);
+                
+                const response = await fetch('/api/structure', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast(`结构创建成功: ${result.summary.nodes} 节点, ${result.summary.elements} 单元`);
+                } else {
+                    showToast(result.error, 'error');
+                }
+            } catch (e) {
+                showToast('创建失败: ' + e.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '创建结构';
+            }
+        }
+        
+        // 静力分析
+        async function analyzeStatic() {
+            const btn = document.getElementById('btnStatic');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> 分析中...';
+            
+            try {
+                const response = await fetch('/api/analyze/static', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('静力分析完成');
+                    displayStaticResults(result);
+                } else {
+                    showToast(result.error, 'error');
+                }
+            } catch (e) {
+                showToast('分析失败: ' + e.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '执行静力分析';
+            }
+        }
+        
+        // 动力分析
+        async function analyzeDynamic() {
+            const btn = document.getElementById('btnDynamic');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> 分析中...';
+            
+            try {
+                const params = {
+                    duration: parseFloat(document.getElementById('duration').value),
+                    dt: parseFloat(document.getElementById('dt').value),
+                    damping_ratio: parseFloat(document.getElementById('damping').value),
+                    amplitude: parseFloat(document.getElementById('amplitude').value)
+                };
+                
+                const response = await fetch('/api/analyze/dynamic', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(params)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('动力分析完成');
+                    displayDynamicResults(result);
+                } else {
+                    showToast(result.error, 'error');
+                }
+            } catch (e) {
+                showToast('分析失败: ' + e.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '执行动力分析';
+            }
+        }
+        
+        // 模态分析
+        async function analyzeModal() {
+            const btn = document.getElementById('btnModal');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> 分析中...';
+            
+            try {
+                const params = {
+                    num_modes: parseInt(document.getElementById('numModes').value)
+                };
+                
+                const response = await fetch('/api/modal', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(params)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('模态分析完成');
+                    displayModalResults(result);
+                } else {
+                    showToast(result.error, 'error');
+                }
+            } catch (e) {
+                showToast('分析失败: ' + e.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '执行模态分析';
+            }
+        }
+        
+        // 显示静力分析结果
+        function displayStaticResults(result) {
+            const container = document.getElementById('results');
+            const r = result.results;
+            const f = result.files;
+            
+            container.innerHTML = `
+                <div class="result-item">
+                    <h4>最大位移</h4>
+                    <span class="result-value">${(r.max_displacement * 1000).toFixed(4)}</span>
+                    <span class="result-unit">mm</span>
+                </div>
+                <div class="result-item">
+                    <h4>最大应力</h4>
+                    <span class="result-value">${(r.max_stress / 1e6).toFixed(2)}</span>
+                    <span class="result-unit">MPa</span>
+                </div>
+                <div class="download-links">
+                    <a href="/api/download/${f.displacements}">📥 位移结果</a>
+                    <a href="/api/download/${f.stresses}">📥 应力结果</a>
+                </div>
+                <div class="image-container">
+                    <h4 style="margin-bottom: 12px;">结构图</h4>
+                    <img src="/api/output/${f.structure_plot}?t=${Date.now()}" alt="Structure">
+                </div>
+                <div class="image-container">
+                    <h4 style="margin-bottom: 12px;">变形图</h4>
+                    <img src="/api/output/${f.deformation_plot}?t=${Date.now()}" alt="Deformation">
+                </div>
+                <div class="image-container">
+                    <h4 style="margin-bottom: 12px;">应力云图</h4>
+                    <img src="/api/output/${f.stress_plot}?t=${Date.now()}" alt="Stress">
+                </div>
+            `;
+        }
+        
+        // 显示动力分析结果
+        function displayDynamicResults(result) {
+            const container = document.getElementById('results');
+            const r = result.results;
+            const f = result.files;
+            
+            container.innerHTML = `
+                <div class="result-item">
+                    <h4>分析时长</h4>
+                    <span class="result-value">${r.duration.toFixed(2)}</span>
+                    <span class="result-unit">s</span>
+                </div>
+                <div class="result-item">
+                    <h4>最大位移</h4>
+                    <span class="result-value">${(r.max_displacement * 1000).toFixed(4)}</span>
+                    <span class="result-unit">mm</span>
+                </div>
+                <div class="download-links">
+                    <a href="/api/download/${f.time_history}">📥 时程数据</a>
+                    <a href="/api/download/${f.animation}">📥 动画文件</a>
+                </div>
+                <div class="image-container">
+                    <h4 style="margin-bottom: 12px;">位移动画</h4>
+                    <img src="/api/output/${f.animation}?t=${Date.now()}" alt="Animation">
+                </div>
+            `;
+        }
+        
+        // 显示模态分析结果
+        function displayModalResults(result) {
+            const container = document.getElementById('results');
+            const r = result.results;
+            
+            let freqHtml = r.frequencies.map((f, i) => `
+                <div class="result-item">
+                    <h4>第 ${i + 1} 阶频率</h4>
+                    <span class="result-value">${f.toFixed(3)}</span>
+                    <span class="result-unit">Hz</span>
+                    <span style="margin-left: 16px; color: var(--text-light);">
+                        周期: ${r.periods[i].toFixed(4)} s
+                    </span>
+                </div>
+            `).join('');
+            
+            container.innerHTML = freqHtml;
+        }
+    </script>
+</body>
+</html>

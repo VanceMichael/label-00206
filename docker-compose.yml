@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  fem-truss:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    container_name: fem-truss-platform
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./output:/app/output
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+      - MPLBACKEND=Agg
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
